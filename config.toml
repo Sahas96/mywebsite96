@@ -94,7 +94,7 @@ disqusShortname = ""
     [[params.tiles.showcase]]
       title = "IMDB Analysis"
       #subtitle = "Ipsum Dolor Sit Amet"
-      image = "pic01.jpg"
+      image = "imdb.png"
       url = "projects/project1"
 
     [[params.tiles.showcase]]
