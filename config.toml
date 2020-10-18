@@ -138,12 +138,9 @@ disqusShortname = ""
   # Section Type Two
   [params.two]
     enable = true
-    title = "Massa libero"
-    subtitle = """Nullam et orci eu lorem consequat tincidunt vivamus et sagittis libero. 
-    Mauris aliquet magna magna sed nunc rhoncus pharetra. 
-    Pellentesque condimentum sem. In efficitur ligula tate urna. Maecenas laoreet massa vel lacinia pellentesque lorem ipsum dolor. 
-    Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis libero.
-    Mauris aliquet magna magna sed nunc rhoncus amet pharetra et feugiat tempus."""
+    title = "About Me"
+    #subtitle = """Nullam et orci eu lorem consequat tincidunt vivamus et sagittis libero. 
+    content = "Welcome to my website. My name is Sahas Duggirala, I am a Masters student at London Business School. This is the beginning of what I hope is a long journey in Data Analytics.Please feel free to look around and explore a few projects I have worked on.Given that I am new to this, I would appreciate any feedback and suggestions you may have."
     buttonText = "Get Started"
     url = "blogs"
 
@@ -191,9 +188,9 @@ disqusShortname = ""
 
     # Uses font awesome icons
     [[params.footer.social]]
-      icon = "fa-twitter"
-      url= "https://www.twitter.com"
-      label = "Twitter"
+      #icon = "fa-twitter"
+     # url= "https://www.twitter.com"
+     # label = "Twitter"
 
     [[params.footer.social]]
       icon = "fa-facebook"
