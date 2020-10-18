@@ -106,7 +106,7 @@ disqusShortname = ""
     [[params.tiles.showcase]]
       title = "Drinks Analysis"
       #subtitle = "Lorem Etiam Nullam"
-      image = "drinkingpicture.jpg"
+      image = "drinkingpicture.png"
       url = "projects/project3"
 
     [[params.tiles.showcase]]
