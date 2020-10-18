@@ -11,8 +11,6 @@ output:
     toc: yes
     toc_float: yes
     code_folding: show
----
-
 
 ```{r, setup, echo=FALSE}
 knitr::opts_chunk$set(

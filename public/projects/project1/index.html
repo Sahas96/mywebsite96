@@ -1,21 +1,3 @@
----
-title: 'Differences between directors: An Analysis'
-author: "Sahas D"
-date: "2020-10-18"
-output:
-  html_document:
-    theme: flatly
-    highlight: zenburn
-    number_sections: yes
-    toc: yes
-    toc_float: yes
-    code_folding: show
-  word_document:
-    toc: yes
-  pdf_document:
-    toc: yes
----
-
 
 
 <div id="imdb-ratings-differences-between-directors" class="section level1">
@@ -126,7 +108,7 @@ get_pvalue(obs_stat =(7.57-6.93) , direction = &quot;both&quot;)  </code></pre>
 <pre><code>## # A tibble: 1 x 1
 ##   p_value
 ##     &lt;dbl&gt;
-## 1   0.006</code></pre>
+## 1   0.002</code></pre>
 <pre class="r"><code># The results again indicate that we can reject the null and that there indeed is statistically significant difference between the means
 
 t.test(rating ~ director, data = hypothesis_test)</code></pre>
