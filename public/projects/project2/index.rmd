@@ -1,6 +1,6 @@
 ---
-title: 'Temperature Change Analysis'
-author: "Sahas Duggirala
+title: 'Global warming analysis'
+author: "Sahas"
 date: "`r Sys.Date()`"
 output:
   html_document:
