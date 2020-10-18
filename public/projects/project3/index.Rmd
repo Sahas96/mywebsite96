@@ -1,0 +1,135 @@
+---
+title: "Drinks Analysis"
+author: "Sahas Duggirala"
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+---
+
+
+```{r, setup, echo=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+
+```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(fivethirtyeight)
+library(here)
+library(skimr)
+library(janitor)
+library(vroom)
+library(tidyquant)
+library(rvest)    # scrape websites
+library(purrr)  
+library(lubridate) #to handle dates
+library(patchwork)
+```
+
+
+
+# Where Do People Drink The Most Beer, Wine And Spirits?
+
+
+```{r, load_alcohol_data}
+library(fivethirtyeight)
+data(drinks)
+
+
+# or download directly
+# alcohol_direct <- read_csv("https://raw.githubusercontent.com/fivethirtyeight/data/master/alcohol-consumption/drinks.csv")
+
+```
+
+
+
+What are the variable types? Any missing values we should worry about? 
+
+```{r glimpse_skim_data}
+glimpse(drinks)
+skim(drinks)
+
+
+```
+# numeric, No
+
+Make a plot that shows the top 25 beer consuming countries
+
+```{r beer_plot}
+Top_25_beer <-
+ Top_25_beer <- drinks %>%
+select(country, beer_servings) %>%
+arrange(desc(beer_servings)) %>%
+head(25)
+glimpse(Top_25_beer)
+
+plot1 <- ggplot(Top_25_beer, aes(x = beer_servings, y = reorder(country, beer_servings))) + 
+  geom_col()
+plot1
+
+```
+
+Make a plot that shows the top 25 wine consuming countries
+
+```{r wine_plot}
+Top_25_wine <-
+ Top_25_wine <- drinks %>%
+select(country, wine_servings) %>%
+arrange(desc(wine_servings)) %>%
+head(25)
+glimpse(Top_25_wine)
+
+plot2 <- ggplot(Top_25_wine, aes(x = wine_servings, y = reorder(country, wine_servings))) + 
+  geom_col()
+plot2
+
+
+
+```
+
+Finally, make a plot that shows the top 25 spirit consuming countries
+```{r spirit_plot}
+Top_25_spirit <-
+ Top_25_spirit <- drinks %>%
+select(country, spirit_servings) %>%
+arrange(desc(spirit_servings)) %>%
+head(25)
+glimpse(Top_25_spirit)
+
+plot3 <- ggplot(Top_25_spirit, aes(x = spirit_servings, y = reorder(country, spirit_servings))) + 
+  geom_col()
+plot3
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
