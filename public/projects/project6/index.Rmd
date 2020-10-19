@@ -1,9 +1,7 @@
 ---
-title: 'Political Contribution Analysis
+title: 'Email Usage Analysis'
 author: "Sahas Duggirala"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     theme: flatly
     highlight: zenburn
@@ -11,10 +9,12 @@ output:
     toc: yes
     toc_float: yes
     code_folding: show
+  pdf_document:
+    toc: yes
 ---
 
 
-```{r, setup, echo=FALSE}
+```{r, setup, include=FALSE}
 knitr::opts_chunk$set(
   message = FALSE, 
   warning = FALSE, 
@@ -31,156 +31,52 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
+```{r load-libraries, include=FALSE}
 library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
 library(mosaic)
 library(ggthemes)
 library(lubridate)
-library(fivethirtyeight)
 library(here)
 library(skimr)
 library(janitor)
+library(httr)
+library(readxl)
 library(vroom)
-library(tidyquant)
-library(rvest)    # scrape websites
-library(purrr)  
-library(lubridate) #to handle dates
 ```
 
 
 
 
+## Email usage
 
-2016 California Political Contribution Analysis
+In this chunk, we are analysing aggregate email usage.
 
-Here, I am showing the top ten cities in California that raised the highest amounts in political contributions during the 2016 US presidential election.
+```{r, emailusage}
+email_data <- gss %>% 
+  filter(emailmin != "NA", emailhr != "NA") %>%
+  mutate(email = 60 * as.numeric(emailhr) + as.numeric(emailmin))
 
+#Prepare the data for the mean and median lines
+email_information <- email_data %>% 
+  summarise(mean = mean(email, na.rm = TRUE), median = median(email, na.rm = TRUE))
 
-```{r challenge2, echo=FALSE, out.width="100%"}
-knitr::include_graphics(here::here("images", "challenge2.png"), error = FALSE)
-```
+# geom_histogram()+
+email_data %>% 
+  ggplot(aes(x=email)) +
+  geom_density() +
+  theme_classic()+
+  theme(legend.position = "bottom")+
 
-
-```{r, load_CA_data, warnings= FALSE, message=FALSE}
-CA_contributors_2016 <- vroom::vroom(here::here("data","CA_contributors_2016.csv"))
-glimpse(CA_contributors_2016)
-
-```
-
-```{r, load_CA_data2, warnings= FALSE, message=FALSE}
-# Make sure you use vroom() as it is significantly faster than read.csv()
-CA_contributors_2016 <- vroom::vroom(here::here("data","CA_contributors_2016.csv"))
-glimpse(CA_contributors_2016)
-```
-
-#Join the two framework
-```{r CA_contributors_2016_merge}
-zip_code_database <- vroom::vroom(here::here("data","zip_code_database.csv"))
-
-zip_code_database$zip = as.numeric(zip_code_database$zip)
-
-CA_contributors_2016_merge = CA_contributors_2016 %>%
-  inner_join(zip_code_database, by = "zip")
-glimpse(CA_contributors_2016_merge)
-```
-
-#Clinton plot
-```{r cliton_plot}
-p1 <- CA_contributors_2016_merge %>%
-  filter(cand_nm == "Clinton, Hillary Rodham") %>%
-  group_by(primary_city) %>%
-  summarise(
-    total_contribution = sum(contb_receipt_amt)
-  ) %>%
-  arrange(desc(total_contribution)) %>%
-  slice_max(total_contribution, n=10) %>% 
-  ggplot(aes(x = total_contribution, y = reorder(primary_city, total_contribution))) +
-  geom_col(fill = "steelblue") +
-  labs (
-    title="Clinton, Hillary Rodham",
-    x="Amount raised",
-    y=NULL
-    ) +
-  theme(title=element_text(size=9),
-        axis.text.x=element_text(size=8),
-        axis.text.y=element_text(size=8)
-        ) 
-```
-
-#Trump plot
-```{r trump_plot}
-p2 <- CA_contributors_2016_merge %>%
-  filter(cand_nm == "Trump, Donald J.") %>%
-  group_by(primary_city) %>%
-  summarise(
-    total_contribution = sum(contb_receipt_amt)
-  ) %>%
-  arrange(desc(total_contribution)) %>%
-  slice_max(total_contribution, n=10) %>% 
-  ggplot(aes(x = total_contribution, y = reorder(primary_city, total_contribution))) +
-  geom_col(fill="darkred") +
-  labs (
-    title="Trump, Donald J.",
-    x="Amount raised",
-    y=NULL
-    ) +
-  theme(title=element_text(size=9),
-        axis.text.x=element_text(size=8),
-        axis.text.y=element_text(size=8)
-        ) 
-```
-#Merge two plots
-```{r merge_plot}
-library(patchwork)
-p1 + p2 + plot_annotation(title = 'Where did candidates raise most money?')
-```
-
-#Top 10 candidates plot
-```{r merge_10_plot}
-library(tidytext)
-CA_contributors_2016_merge <- CA_contributors_2016_merge %>%
-  group_by(cand_nm, CA_contributors_2016_merge$primary_city) %>%
-  mutate(total_contribution_city = sum(contb_receipt_amt))
-
-top_10 <- data.frame(CA_contributors_2016_merge$cand_nm, CA_contributors_2016_merge$primary_city, CA_contributors_2016_merge$total_contribution_city)
-top_10 <- unique(top_10)
-
-top_10_name <- CA_contributors_2016_merge %>%
-  group_by(cand_nm) %>%
-  summarise(total_contribution_all = sum(contb_receipt_amt)) %>%
-  arrange(desc(total_contribution_all)) %>%
-  slice_max(total_contribution_all, n=10) 
-
-top_10 <- top_10 %>%
-  mutate(iftop10 = CA_contributors_2016_merge.cand_nm %in% top_10_name$cand_nm)
-
-top_10 <- top_10[-which(top_10$iftop10 == FALSE),]
-
-top_10_new <- top_10 %>%
-  group_by(CA_contributors_2016_merge.cand_nm) %>%
-  top_n(-10,desc(CA_contributors_2016_merge.total_contribution_city))
-
-top_10_new %>%
-  mutate(CA_contributors_2016_merge.cand_nm=as.factor(CA_contributors_2016_merge.cand_nm), CA_contributors_2016_merge.primary_city=reorder_within(CA_contributors_2016_merge.primary_city, CA_contributors_2016_merge.total_contribution_city, CA_contributors_2016_merge.cand_nm)) %>%
-  ggplot(aes(CA_contributors_2016_merge.primary_city, CA_contributors_2016_merge.total_contribution_city, fill = CA_contributors_2016_merge.cand_nm)) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~CA_contributors_2016_merge.cand_nm, scales = "free_y") +
-  coord_flip() +
-  scale_x_reordered() +
-  scale_y_continuous(expand = c(0,0)) +
-  labs(y = "Amount raised",
-    x = NULL,
-    title = "Where did candidates raise most money?")+
-  theme(title=element_text(size=8),
-    axis.text.x=element_text(size=5),
-    axis.text.y=element_text(size=5)
-    )    
-
+ # add mean and median lines
+  geom_vline(aes(xintercept = email_information$mean, colour = 'mean'), linetype = "dashed", size = 2)  +
+  geom_vline(aes(xintercept = email_information$median, colour = 'median'), linetype = "dashed", size = 2) +
+  
+  # customize color of mean and median lines
+  scale_color_manual(name = NULL, values = c(mean = "#F36F21", median = "#FFF200"))  +
+  labs(x = "Minutes spent on email weekly", y="Number of emails sent",
+       title = "How much time you really spend emailing each week") +
+  theme(text=, plot.title  = element_text (size=20, colour="#7D7D7D"),
+        axis.title =  element_text(size=12, colour="#002144"), axis.title.y= element_text(size=12, colour="#002144"))
 
 ```
-
-
-
-
-
 
