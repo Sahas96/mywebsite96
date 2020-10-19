@@ -124,7 +124,7 @@ disqusShortname = ""
     [[params.tiles.showcase]]
       title = "Gender Pay Gap Analysis with Omega Group"
       #subtitle = "Feugiat Amet Tempus"
-      image = "politics.png"
+      image = "gender.png"
       url = "projects/project6"
     # You can make more showcases by copy and pasting the code above
 

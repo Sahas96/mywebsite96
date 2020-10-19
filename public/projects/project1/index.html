@@ -1,21 +1,80 @@
----
-title: 'Differences between directors: An Analysis'
-author: "Sahas D"
-date: "2020-10-19"
-output:
-  html_document:
-    theme: flatly
-    highlight: zenburn
-    number_sections: yes
-    toc: yes
-    toc_float: yes
-    code_folding: show
-  word_document:
-    toc: yes
-  pdf_document:
-    toc: yes
----
+<!DOCTYPE HTML>
+<html>
 
+    <head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<meta name="description" content="MFA 2021 Student from Canada and India">
+	<meta name="author" content="Sahas Duggirala">
+	<meta name="generator" content="Hugo 0.76.5" />
+	<title>Differences between directors: An Analysis &middot; Sahas&#39; Portfolio</title>
+	<!-- Stylesheets -->
+	
+	<link rel="stylesheet" href="https://sahas-portfolio.netlify.app/css/main.css"/>
+	
+	
+
+	
+
+	<!-- Custom Fonts -->
+	<link href="https://sahas-portfolio.netlify.app/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+	
+	<link rel="shortcut icon" type="image/x-icon" href="https://sahas-portfolio.netlify.app/favicon.ico">
+	<link rel="icon" type="image/x-icon" href="https://sahas-portfolio.netlify.app/favicon.ico">
+	
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="js/ie/html5shiv.js"></script>
+	<script src="js/ie/html5shiv.jsrespond.min.js"></script>
+	<![endif]-->
+</head>
+
+    <body>
+
+    <!-- Wrapper -->
+        <div id="wrapper">
+
+            <!-- Header -->
+    <header id="header" class="alt">
+        <a href="https://sahas-portfolio.netlify.app" class="logo"><strong>Sahas&#39; Portfolio</strong> <span></span></a>
+        <nav>
+            <a href="#menu">Menu</a>
+        </nav>
+    </header>
+
+<!-- Menu -->
+    <nav id="menu">
+        <ul class="links">
+            
+                <li><a href="https://sahas-portfolio.netlify.app">Home</a></li>
+            
+                <li><a href="https://sahas-portfolio.netlify.app/blogs">Blogs</a></li>
+            
+
+        </ul>
+        <ul class="actions vertical">
+            
+                <li><a href="https://sahas-portfolio.netlify.app/blogs" class="button special fit">Get Started</a></li>
+            
+            
+        </ul>
+    </nav>
+
+        <!-- Main -->
+            <div id="main" class="alt">
+
+                
+                    <section id="one">
+                        <div class="inner">
+                            <header class="major">
+                                <h1>Differences between directors: An Analysis</h1>
+                            </header>
+                            
+                            
 
 
 <div id="imdb-ratings-differences-between-directors" class="section level1">
@@ -126,7 +185,7 @@ get_pvalue(obs_stat =(7.57-6.93) , direction = &quot;both&quot;)  </code></pre>
 <pre><code>## # A tibble: 1 x 1
 ##   p_value
 ##     &lt;dbl&gt;
-## 1   0.004</code></pre>
+## 1   0.008</code></pre>
 <pre class="r"><code># The results again indicate that we can reject the null and that there indeed is statistically significant difference between the means
 
 t.test(rating ~ director, data = hypothesis_test)</code></pre>
@@ -145,3 +204,60 @@ t.test(rating ~ director, data = hypothesis_test)</code></pre>
 
 # Having observed these results consistently across our different approaches we reject the null hypothesis and conclude that there indeed is a difference between the two means.</code></pre>
 </div>
+
+                        </div>
+                    </section>
+            <!-- Disqus Inject -->
+                
+            </div>
+            
+        <!-- Footer -->
+            
+                <!-- Footer -->
+    <footer id="footer">
+        <div class="inner">
+            <ul class="icons">
+                
+                    <li><a href="" class="icon alt " target="_blank"><span class="label"></span></a></li>
+                
+                    <li><a href="https://www.facebook.com" class="icon alt fa-facebook" target="_blank"><span class="label">Facebook</span></a></li>
+                
+                    <li><a href="https://www.instagram.com" class="icon alt fa-instagram" target="_blank"><span class="label">Instagram</span></a></li>
+                
+                    <li><a href="https://www.github.com" class="icon alt fa-github" target="_blank"><span class="label">GitHub</span></a></li>
+                
+                    <li><a href="https://www.linkedin.com" class="icon alt fa-linkedin" target="_blank"><span class="label">LinkedIn</span></a></li>
+                
+            </ul>
+            <ul class="copyright">
+                <li>&copy; SD Enterprises</li>
+                
+                <li>Design:  <a href="https://www.html5up.net">HTML5 UP</a></li>
+                
+            </ul>
+        </div>
+    </footer>
+
+            
+        </div>
+
+    <!-- Scripts -->
+        <!-- Scripts -->
+    <!-- jQuery -->
+    <script src="https://sahas-portfolio.netlify.app/js/jquery.min.js"></script>
+    <script src="https://sahas-portfolio.netlify.app/js/jquery.scrolly.min.js"></script>
+    <script src="https://sahas-portfolio.netlify.app/js/jquery.scrollex.min.js"></script>
+    <script src="https://sahas-portfolio.netlify.app/js/skel.min.js"></script>
+    <script src="https://sahas-portfolio.netlify.app/js/util.js"></script>
+
+    
+
+    <!-- Main JS -->
+    <script src="https://sahas-portfolio.netlify.app/js/main.js"></script>
+
+    
+
+    
+
+    </body>
+</html>
