@@ -116,10 +116,10 @@ disqusShortname = ""
       url = "projects/project4"
 
     [[params.tiles.showcase]]
-      title = "Consequat"
-      subtitle = "Ipsum Dolor Sit Amet"
-      image = "pic05.jpg"
-      url = "blogs/ipsum"
+      title = "Health Data Analysis"
+      #subtitle = "Ipsum Dolor Sit Amet"
+      image = "worldbank.png"
+      url = "projects/project5"
 
     [[params.tiles.showcase]]
       title = "Etiam"
