@@ -1,6 +1,7 @@
 ---
-title: 'Email Usage Analysis'
-author: "Sahas Duggirala"
+title: 'Session 6: Homework 3'
+author: "Group B 21"
+date: "`r Sys.Date()`"
 output:
   html_document:
     theme: flatly
@@ -9,12 +10,14 @@ output:
     toc: yes
     toc_float: yes
     code_folding: show
+  word_document:
+    toc: yes
   pdf_document:
     toc: yes
 ---
 
 
-```{r, setup, include=FALSE}
+```{r, setup, echo=FALSE}
 knitr::opts_chunk$set(
   message = FALSE, 
   warning = FALSE, 
@@ -31,52 +34,120 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r load-libraries, include=FALSE}
+```{r load-libraries, echo=FALSE}
 library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
 library(mosaic)
 library(ggthemes)
-library(lubridate)
+library(GGally)
+library(readxl)
 library(here)
 library(skimr)
 library(janitor)
-library(httr)
-library(readxl)
-library(vroom)
+library(broom)
+library(tidyquant)
+library(infer)
+library(openintro)
+library(tidyquant)
 ```
 
 
+# Omega Group plc- Pay Discrimination
 
 
-## Email usage
+At the last board meeting of Omega Group Plc., the headquarters of a large multinational company, the issue was raised that women were being discriminated in the company, in the sense that the salaries were not the same for male and female executives. A quick analysis of a sample of 50 employees (of which 24 men and 26 women) revealed that the average salary for men was about 8,700 higher than for women. This seemed like a considerable difference, so it was decided that a further analysis of the company salaries was warranted. 
 
-In this chunk, we are analysing aggregate email usage.
 
-```{r, emailusage}
-email_data <- gss %>% 
-  filter(emailmin != "NA", emailhr != "NA") %>%
-  mutate(email = 60 * as.numeric(emailhr) + as.numeric(emailmin))
+## Loading the data
 
-#Prepare the data for the mean and median lines
-email_information <- email_data %>% 
-  summarise(mean = mean(email, na.rm = TRUE), median = median(email, na.rm = TRUE))
 
-# geom_histogram()+
-email_data %>% 
-  ggplot(aes(x=email)) +
-  geom_density() +
-  theme_classic()+
-  theme(legend.position = "bottom")+
+```{r load_omega_data}
+omega <- read_csv(here::here("data", "omega.csv"))
+glimpse(omega) # examine the data frame
+```
 
- # add mean and median lines
-  geom_vline(aes(xintercept = email_information$mean, colour = 'mean'), linetype = "dashed", size = 2)  +
-  geom_vline(aes(xintercept = email_information$median, colour = 'median'), linetype = "dashed", size = 2) +
-  
-  # customize color of mean and median lines
-  scale_color_manual(name = NULL, values = c(mean = "#F36F21", median = "#FFF200"))  +
-  labs(x = "Minutes spent on email weekly", y="Number of emails sent",
-       title = "How much time you really spend emailing each week") +
-  theme(text=, plot.title  = element_text (size=20, colour="#7D7D7D"),
-        axis.title =  element_text(size=12, colour="#002144"), axis.title.y= element_text(size=12, colour="#002144"))
+## Relationship Salary - Gender ?
+
+Is there a significant difference between the salaries of the male and female executives?
+
+```{r, confint_single_valiables}
+# Summary Statistics of salary by gender
+mosaic::favstats (salary ~ gender, data=omega)
+
+# Dataframe with two rows (male-female) and having as columns gender, mean, SD, sample size, 
+# the t-critical value, the standard error, the margin of error, 
+# and the low/high endpoints of a 95% condifence interval
+sum_stat <- omega %>% group_by(gender) %>%
+            summarise(mean=mean(salary),
+                      sd=sd(salary),
+                      samp_size=n(),
+                      t_crit= qt(.975,samp_size-1),
+                      se=sd/sqrt(samp_size),
+                      MoE=t_crit*se,
+                      lower_ci_95 = mean-se,
+                      upper_ci_95 = mean+se)
+sum_stat
+                  
+```
+>
+Explanation: The summarized stats show that mean salary is lower for women compared to men salaries. The confidence intervals do not overlap and the difference is significant with 95% confidence..
+
+Let's run a hypothesis test to be absolutely certain......
+
+```{r, hypothesis_testing}
+# hypothesis testing using t.test() 
+t.test((omega %>% filter(gender=="male"))$salary,(omega%>%filter(gender=="female"))$salary)
+
+# hypothesis testing using infer package
+set.seed(1234)
+simu <- omega %>% specify(salary~gender) %>% hypothesize(null="independence")%>%generate(reps=1000,type="permute")
+
+sim_delta_mean <-simu%>% calculate(stat="diff in means", order=c("male","female"))
+
+real_delta_mean <- omega %>% specify(salary~gender)%>% calculate(stat="diff in means", order=c("male","female"))
+
+sim_delta_mean %>% visualise (obs_stat = real_delta_mean, direction="both")+labs(title="Wage gap by gender",subtitle="Observed difference in red")  
 
 ```
+
+> 
+Explanation: The observed gap is within the interval so we can reject the null hypothesis. Men and women do not make the same amount of money. This could be attributable to a variety of factors such as: Are there more men in sectors that pay more (eg: tech, finance) and this is skewing the data? We could go deeper to analyze the proportion of men and who choose STEM degrees and what the average pay for a STEM graduate is. Furthermore, specitic to Omega, are there more men in senior positions? Department-level data should be used versus the organization as a whole. 
+
+## Relationship Experience - Gender?
+
+Is there a correlation between Experience on the job and gender?
+
+```{r, experience_stats}
+# Summary Statistics of salary by gender
+favstats (experience ~ gender, data=omega)
+
+```
+
+
+>
+Explanation: The difference in experience between male and female executives may account for the difference in wages but requires testing to confirm the correlation.
+
+
+## Relationship Salary - Experience ?
+
+What's the relationship between salary and experience?
+
+
+```{r, salary_exp_scatter}
+ggplot(omega, aes(experience,salary)) + geom_point() +geom_smooth(method=lm) +
+  labs(x="Exp (years)", y = "Salary")
+
+```
+
+
+Let's check correlations between the data
+
+
+```{r, ggpairs}
+omega %>% 
+  select(gender, experience, salary) %>% #order variables they will appear in ggpairs()
+  ggpairs(aes(colour=gender, alpha = 0.3))+
+  theme_bw()
+```
+
+Explanation: The experience has a stronger correlation with salary for female group.
 

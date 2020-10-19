@@ -122,7 +122,7 @@ disqusShortname = ""
       url = "projects/project5"
 
     [[params.tiles.showcase]]
-      title = "Email usage Analysis"
+      title = "Gender Pay Gap Analysis with Omega Group"
       #subtitle = "Feugiat Amet Tempus"
       image = "politics.png"
       url = "projects/project6"
