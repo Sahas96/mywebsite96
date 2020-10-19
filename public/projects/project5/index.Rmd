@@ -1,0 +1,210 @@
+---
+title: 'Health Data Analysis'
+author: "Sahas Duggirala"
+output:
+  html_document:
+    theme: flatly
+    highlight: zenburn
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+  pdf_document:
+    toc: yes
+---
+
+
+```{r, setup, include=FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+
+```{r load-libraries, include=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(here)
+library(skimr)
+library(janitor)
+library(httr)
+library(readxl)
+library(vroom)
+```
+
+
+
+
+```{r, get_data, cache=TRUE}
+
+# load gapminder HIV data
+hiv <- read_csv(here::here("data","adults_with_hiv_percent_age_15_49.csv"))
+life_expectancy <- read_csv(here::here("data","life_expectancy_years.csv"))
+
+# get World bank data using wbstats
+indicators <- c("SP.DYN.TFRT.IN","SE.PRM.NENR", "SH.DYN.MORT", "NY.GDP.PCAP.KD")
+
+
+library(wbstats)
+
+worldbank_data <- wb_data(country="countries_only", #countries only- no aggregates like Latin America, Europe, etc.
+                          indicator = indicators, 
+                          start_date = 1960, 
+                          end_date = 2016)
+
+# get a dataframe of information regarding countries, indicators, sources, regions, indicator topics, lending types, income levels,  from the World Bank API 
+countries <-  wbstats::wb_cachelist$countries
+
+view(countries)
+view(hiv)
+view(life_expectancy)
+view(worldbank_data)
+
+```
+
+You have to join the 3 dataframes (life_expectancy, worldbank_data, and HIV) into one. You may need to tidy your data first and then perform [join operations](http://r4ds.had.co.nz/relational-data.html). Think about what type makes the most sense **and explain why you chose it**.
+
+``` {r, tidydata}
+
+tidy_life_expectancy <- life_expectancy %>% 
+  pivot_longer(names_to="year", values_to="life_expect", cols= 2:302) %>% 
+  transform(year = as.numeric(year)) %>% 
+  drop_na(life_expect)
+
+
+tidy_hiv_data <- hiv %>% 
+  pivot_longer(names_to="year", values_to ="hiv_proportion", cols= 2:34) %>% 
+  transform(year = as.numeric(year)) %>%
+  drop_na(hiv_proportion)  
+
+
+tidy_world_bank <- worldbank_data %>% 
+  rename("GDP_per_capita"=NY.GDP.PCAP.KD, 
+         "School_enrollment"= SE.PRM.NENR, 
+         "Mortality_rate"=SH.DYN.MORT,
+         "Fertility_rate" =SP.DYN.TFRT.IN, 
+         "year"=date)
+
+# after cleaning the data, we will join the relevant pieces of data. 
+
+
+joined_data_1 <- full_join(tidy_hiv_data, tidy_life_expectancy, by = c('country','year'))
+joined_data_2 <- full_join(joined_data_1, tidy_world_bank, by = c('country','year'))
+
+joined_data_2
+
+
+```
+``` {r, joindata}
+
+country_data <- left_join(joined_data_2, countries, by = "country")
+
+country_data
+tidy_country_data <- country_data %>% 
+drop_na()
+  
+tidy_country_data
+
+
+```
+
+
+1. What is the relationship between HIV prevalence and life expectancy? 
+
+``` {r, HIV_Life}
+
+ggplot(tidy_country_data, aes(y=life_expect, x=hiv_proportion, na.rm=TRUE))+ 
+  geom_point(alpha=0.1)+
+  geom_smooth(size=0.5)+
+  facet_wrap(~region,scales = "free")+ 
+  theme_economist()+
+  theme(axis.title = element_text())+
+  labs(y="Life Expectancy (Years)", x= "HIV Proportion (%)", title="HIV Rate and Life Expectancy")
+
+```
+
+
+1. What is the relationship between fertility rate and GDP per capita? 
+
+```{r, Fertility_GDP}
+
+ggplot(tidy_country_data, aes(y=GDP_per_capita, x=Fertility_rate, na.rm=TRUE))+ 
+  geom_point(alpha=0.1, na.rm=TRUE)+
+  geom_smooth(na.rm=TRUE)+
+  facet_wrap(~region,scales = "free")+ 
+  theme_economist()+
+  theme(axis.title = element_text())+
+  labs(y="GDP Per Capita ($)", x= "Fertility Rate (%)", title="GDP Per Capita and Fertility Rate")
+
+
+```
+
+
+
+1. Which regions have the most observations with missing HIV data? 
+
+```{r, missing}
+missing_hiv_data <-country_data %>% 
+  select("hiv_proportion","region") %>% 
+  drop_na(region) %>% 
+  filter(is.na(hiv_proportion)) %>% 
+  group_by(region) %>% 
+  summarise(count =n()) %>% 
+  arrange(desc(count))
+
+missing_hiv_data
+
+library(kableExtra)
+
+
+kbl(missing_hiv_data,col.names=c("Region","Number of NA Values in HIV Data")) %>%
+  kable_styling()
+
+
+ggplot(missing_hiv_data, aes(x= count, y=reorder(region, count)))+
+  geom_col()+
+  labs(x="Number of Missing Entries", y="region", title="Number of missing entries for HIV data")+
+  theme_economist()+
+  theme(axis.title=element_text())
+
+```
+
+
+1(a). How has mortality rate for under 5 changed by region? 
+1(b). Is there a relationship between primary school enrollment and fertility rate?
+
+```{r,improvement_data}
+
+# mortality rate by region 
+
+mortality_plot <- tidy_country_data %>%
+  group_by(region,year) %>% 
+  summarize(mean_mortality=mean(Mortality_rate))
+mortality_plot
+
+
+mortality_region <- ggplot(mortality_plot, aes(x=year, y=mean_mortality, group=region)) + 
+  geom_line() + 
+  facet_wrap(~region,scales='free')+ 
+  theme_economist()+
+  theme(axis.text.x=element_text())+
+  labs(title = "Change in mortality rate over time")+
+  xlab("Years") +
+  ylab("Mortality rate")
+
+mortality_region
+
+```
+
